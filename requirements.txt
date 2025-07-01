@@ -1,0 +1,5 @@
+gitpython
+diagrams
+python-hcl2
+
+# pip install -r requirements.txt
