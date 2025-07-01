@@ -1,4 +1,4 @@
-!pip install gitpython diagrams hcl2
+#!pip install gitpython diagrams hcl2
 
 import os
 import re
@@ -6,11 +6,11 @@ from git import Repo
 import hcl2
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import EC2, ECS, Lambda, AutoScaling
-from diagrams.aws.database import RDS, DynamoDB, ElastiCache, Redshift
+from diagrams.aws.database import RDS, Dynamodb, ElastiCache, Redshift
 from diagrams.aws.network import ELB, ALB, NLB, Route53, CloudFront, VPC, PrivateSubnet, PublicSubnet
 from diagrams.aws.security import WAF, IAM, Cognito
 from diagrams.aws.storage import S3, EBS, EFS
-from diagrams.aws.integration import SQS, SNS, EventBridge
+from diagrams.aws.integration import SQS, SNS
 from diagrams.aws.analytics import Kinesis, Athena
 from diagrams.aws.ml import Sagemaker
 from diagrams.aws.devtools import Codebuild, Codedeploy, Codepipeline
@@ -130,7 +130,7 @@ def get_diagram_components(resources):
         # Database
         'aws_db_instance': ('database', RDS),
         'aws_rds_cluster': ('database', RDS),
-        'aws_dynamodb_table': ('database', DynamoDB),
+        'aws_dynamodb_table': ('database', Dynamodb),
         'aws_elasticache_cluster': ('database', ElastiCache),
         'aws_redshift_cluster': ('database', Redshift),
         
@@ -326,5 +326,181 @@ if __name__ == "__main__":
     main()
 
 """
+🚀 Starting Terraform Architecture Diagram Generator
+📁 Repository already exists at: sample_data/out/devops-directive-terraform-course
+✅ Repository updated successfully
 
+🔍 Scanning for Terraform files in: sample_data/out/devops-directive-terraform-course
+📊 Found 28 Terraform files
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/03-basics/aws-backend
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/03-basics/aws-backend/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/03-basics/aws-backend/architecture.png
+   ✅ Found 4 resources across 4 types
+      - 1 aws_s3_bucket
+      - 1 aws_s3_bucket_versioning
+      - 1 aws_s3_bucket_server_side_encryption_configuration
+      - 1 aws_dynamodb_table
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/03-basics/web-app
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/03-basics/web-app/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/03-basics/web-app/architecture.png
+   ✅ Found 19 resources across 14 types
+      - 2 aws_instance
+      - 1 aws_s3_bucket
+      - 1 aws_s3_bucket_versioning
+      - 1 aws_s3_bucket_server_side_encryption_configuration
+      - 2 aws_security_group
+      - 3 aws_security_group_rule
+      - 1 aws_lb_listener
+      - 1 aws_lb_target_group
+      - 2 aws_lb_target_group_attachment
+      - 1 aws_lb_listener_rule
+      - 1 aws_lb
+      - 1 aws_route53_zone
+      - 1 aws_route53_record
+      - 1 aws_db_instance
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/03-basics/terraform-cloud-backend
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/03-basics/terraform-cloud-backend/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/03-basics/terraform-cloud-backend
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/06-organization-and-modules/consul
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/consul/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/06-organization-and-modules/consul
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module
+   📄 Parsing: database.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/database.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: compute.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/compute.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: outputs.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/outputs.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: storage.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/storage.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: networking.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/networking.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: variables.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/variables.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: dns.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/dns.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/06-organization-and-modules/web-app-module/architecture.png
+   ✅ Found 19 resources across 14 types
+      - 1 aws_db_instance
+      - 2 aws_instance
+      - 1 aws_s3_bucket
+      - 1 aws_s3_bucket_versioning
+      - 1 aws_s3_bucket_server_side_encryption_configuration
+      - 2 aws_security_group
+      - 3 aws_security_group_rule
+      - 1 aws_lb_listener
+      - 1 aws_lb_target_group
+      - 2 aws_lb_target_group_attachment
+      - 1 aws_lb_listener_rule
+      - 1 aws_lb
+      - 1 aws_route53_zone
+      - 1 aws_route53_record
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/02-overview
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/02-overview/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/02-overview/architecture.png
+   ✅ Found 1 resources across 1 types
+      - 1 aws_instance
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/workspaces
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/workspaces/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/workspaces
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/staging
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/staging/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/staging
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/production
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/production/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/production
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/global
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/global/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/07-managing-multiple-environments/file-structure/global/architecture.png
+   ✅ Found 1 resources across 1 types
+      - 1 aws_route53_zone
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/examples
+   📄 Parsing: outputs.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/examples/outputs.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/examples/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: variables.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/examples/variables.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/examples/architecture.png
+   ✅ Found 2 resources across 2 types
+      - 1 aws_instance
+      - 1 aws_db_instance
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/web-app
+   📄 Parsing: outputs.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/web-app/outputs.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/web-app/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   📄 Parsing: variables.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/web-app/variables.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/04-variables-and-outputs/web-app/architecture.png
+   ✅ Found 19 resources across 14 types
+      - 2 aws_instance
+      - 1 aws_s3_bucket
+      - 1 aws_s3_bucket_versioning
+      - 1 aws_s3_bucket_server_side_encryption_configuration
+      - 2 aws_security_group
+      - 3 aws_security_group_rule
+      - 1 aws_lb_listener
+      - 1 aws_lb_target_group
+      - 2 aws_lb_target_group_attachment
+      - 1 aws_lb_listener_rule
+      - 1 aws_lb
+      - 1 aws_route53_zone
+      - 1 aws_route53_record
+      - 1 aws_db_instance
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/08-testing/modules/hello-world
+   📄 Parsing: instance.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/08-testing/modules/hello-world/instance.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   🎨 Creating diagram: sample_data/out/devops-directive-terraform-course/08-testing/modules/hello-world/architecture.png
+   ✅ Found 3 resources across 3 types
+      - 1 aws_instance
+      - 1 aws_security_group
+      - 1 aws_security_group_rule
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/08-testing/examples/hello-world
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/08-testing/examples/hello-world/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/08-testing/examples/hello-world
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/08-testing/deployed/staging
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/08-testing/deployed/staging/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/08-testing/deployed/staging
+
+📁 Processing directory: sample_data/out/devops-directive-terraform-course/08-testing/deployed/production
+   📄 Parsing: main.tf
+⚠️ HCL parsing failed for sample_data/out/devops-directive-terraform-course/08-testing/deployed/production/main.tf, using regex fallback: module 'hcl2' has no attribute 'loads'
+   ⚠️ No resources found in sample_data/out/devops-directive-terraform-course/08-testing/deployed/production
+
+✅ Architecture diagram generation complete!
+📁 Diagrams saved as 'architecture.png' in each Terraform directory
 """
