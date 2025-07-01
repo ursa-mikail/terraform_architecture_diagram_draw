@@ -26,7 +26,8 @@ from diagrams.generic.network import Firewall
 
 # Constants
 REPO_URL = "https://github.com/sidpalas/devops-directive-terraform-course.git"
-CLONE_DIR = os.path.expanduser("~/devops-directive-terraform-course")
+#CLONE_DIR = os.path.expanduser("~/devops-directive-terraform-course")
+CLONE_DIR = os.path.expanduser("sample_data/out/devops-directive-terraform-course")
 OUTPUT_DIR = "/tmp/terraform_diagrams"
 
 def clone_or_update_repo(repo_url, clone_dir):
