@@ -167,6 +167,7 @@ def create_checkly_diagram(resources, output_path):
 def main():
     # Configuration
     RAW_URL = "https://raw.githubusercontent.com/checkly/terraform-sample-advanced/master/main.tf"
+    
     OUTPUT_DIR = "/sample_data/out/checkly_diagram"  # Changed to use /tmp for better compatibility
     LOCAL_TF_PATH = os.path.join(OUTPUT_DIR, "main.tf")
     DIAGRAM_PATH = os.path.join(OUTPUT_DIR, "checkly_architecture")
