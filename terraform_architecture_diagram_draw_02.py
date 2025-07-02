@@ -1,4 +1,4 @@
-# !pip install diagrams requests python-hcl2
+#!pip install diagrams requests python-hcl2
 
 import os
 import requests
@@ -35,6 +35,52 @@ def download_terraform_file(url, output_path):
         print(f"❌ Error downloading file: {e}")
         return False
 
+def safe_get_config(config, key, default=None):
+    """Safely get configuration value, handling both dict and list cases"""
+    if isinstance(config, dict):
+        return config.get(key, default)
+    elif isinstance(config, list) and config:
+        # If it's a list, take the first element and try to get the key
+        first_item = config[0]
+        if isinstance(first_item, dict):
+            return first_item.get(key, default)
+    return default
+
+def parse_alert_channel_config(config):
+    """Parse alert channel configuration, handling HCL2 parsing quirks"""
+    channel_info = {
+        'type': 'unknown',
+        'details': {}
+    }
+    
+    # Check for different alert channel types
+    for channel_type in ['slack', 'pagerduty', 'email', 'webhook', 'sms']:
+        if channel_type in config:
+            channel_config = config[channel_type]
+            channel_info['type'] = channel_type
+            
+            # Handle both dict and list formats
+            if isinstance(channel_config, list) and channel_config:
+                channel_config = channel_config[0]
+            
+            if isinstance(channel_config, dict):
+                if channel_type == 'slack':
+                    channel_info['details']['webhook_url'] = channel_config.get('webhook_url', '')
+                    channel_info['details']['channel'] = channel_config.get('channel', '')
+                elif channel_type == 'pagerduty':
+                    channel_info['details']['account'] = channel_config.get('account', '')
+                    channel_info['details']['service_key'] = channel_config.get('service_key', '')
+                elif channel_type == 'email':
+                    channel_info['details']['address'] = channel_config.get('address', '')
+                elif channel_type == 'webhook':
+                    channel_info['details']['url'] = channel_config.get('url', '')
+                    channel_info['details']['method'] = channel_config.get('method', 'POST')
+                elif channel_type == 'sms':
+                    channel_info['details']['number'] = channel_config.get('number', '')
+            break
+    
+    return channel_info
+
 def parse_checkly_resources(tf_path):
     """Parse Terraform file and extract Checkly resources with detailed information"""
     resources = {
@@ -67,95 +113,79 @@ def parse_checkly_resources(tf_path):
                         if resource_type == "checkly_check":
                             check_info = {
                                 'name': resource_name,
-                                'display_name': config.get('name', resource_name),
-                                'type': config.get('type', 'API'),
-                                'group_id': config.get('group_id'),
-                                'locations': config.get('locations', []),
-                                'frequency': config.get('frequency', 300),
-                                'activated': config.get('activated', True),
-                                'should_fail': config.get('should_fail', False),
-                                'runtime_id': config.get('runtime_id'),
-                                'script': config.get('script', ''),
-                                'request': config.get('request', {}),
-                                'tags': config.get('tags', [])
+                                'display_name': safe_get_config(config, 'name', resource_name),
+                                'type': safe_get_config(config, 'type', 'API'),
+                                'group_id': safe_get_config(config, 'group_id'),
+                                'locations': safe_get_config(config, 'locations', []),
+                                'frequency': safe_get_config(config, 'frequency', 300),
+                                'activated': safe_get_config(config, 'activated', True),
+                                'should_fail': safe_get_config(config, 'should_fail', False),
+                                'runtime_id': safe_get_config(config, 'runtime_id'),
+                                'script': safe_get_config(config, 'script', ''),
+                                'request': safe_get_config(config, 'request', {}),
+                                'tags': safe_get_config(config, 'tags', [])
                             }
                             resources['checks'].append(check_info)
                             
                         elif resource_type == "checkly_check_group":
                             group_info = {
                                 'name': resource_name,
-                                'display_name': config.get('name', resource_name),
-                                'locations': config.get('locations', []),
-                                'activated': config.get('activated', True),
-                                'tags': config.get('tags', []),
-                                'environment_variables': config.get('environment_variables', []),
-                                'concurrency': config.get('concurrency', 1)
+                                'display_name': safe_get_config(config, 'name', resource_name),
+                                'locations': safe_get_config(config, 'locations', []),
+                                'activated': safe_get_config(config, 'activated', True),
+                                'tags': safe_get_config(config, 'tags', []),
+                                'environment_variables': safe_get_config(config, 'environment_variables', []),
+                                'concurrency': safe_get_config(config, 'concurrency', 1)
                             }
                             resources['check_groups'].append(group_info)
                             
                         elif resource_type == "checkly_alert_channel":
+                            channel_config = parse_alert_channel_config(config)
                             channel_info = {
                                 'name': resource_name,
-                                'type': 'unknown',
+                                'type': channel_config['type'],
+                                'details': channel_config['details'],
                                 'config': config
                             }
-                            
-                            # Determine channel type based on configuration
-                            if 'slack' in config:
-                                channel_info['type'] = 'slack'
-                                channel_info['webhook_url'] = config.get('slack', {}).get('webhook_url', '')
-                            elif 'pagerduty' in config:
-                                channel_info['type'] = 'pagerduty'
-                                channel_info['account'] = config.get('pagerduty', {}).get('account', '')
-                            elif 'email' in config:
-                                channel_info['type'] = 'email'
-                                channel_info['address'] = config.get('email', {}).get('address', '')
-                            elif 'webhook' in config:
-                                channel_info['type'] = 'webhook'
-                                channel_info['url'] = config.get('webhook', {}).get('url', '')
-                            elif 'sms' in config:
-                                channel_info['type'] = 'sms'
-                                channel_info['number'] = config.get('sms', {}).get('number', '')
-                            
                             resources['alert_channels'].append(channel_info)
                             
                         elif resource_type == "checkly_dashboard":
                             dashboard_info = {
                                 'name': resource_name,
-                                'custom_url': config.get('custom_url', ''),
-                                'custom_domain': config.get('custom_domain', ''),
-                                'logo': config.get('logo', ''),
-                                'header': config.get('header', ''),
-                                'refresh_rate': config.get('refresh_rate', 60),
-                                'paginate': config.get('paginate', True),
-                                'pagination_rate': config.get('pagination_rate', 30),
-                                'hide_tags': config.get('hide_tags', False)
+                                'custom_url': safe_get_config(config, 'custom_url', ''),
+                                'custom_domain': safe_get_config(config, 'custom_domain', ''),
+                                'logo': safe_get_config(config, 'logo', ''),
+                                'header': safe_get_config(config, 'header', ''),
+                                'refresh_rate': safe_get_config(config, 'refresh_rate', 60),
+                                'paginate': safe_get_config(config, 'paginate', True),
+                                'pagination_rate': safe_get_config(config, 'pagination_rate', 30),
+                                'hide_tags': safe_get_config(config, 'hide_tags', False)
                             }
                             resources['dashboards'].append(dashboard_info)
                             
                         elif resource_type == "checkly_maintenance_window":
                             mw_info = {
                                 'name': resource_name,
-                                'display_name': config.get('name', resource_name),
-                                'starts_at': config.get('starts_at', ''),
-                                'ends_at': config.get('ends_at', ''),
-                                'repeat_unit': config.get('repeat_unit', ''),
-                                'repeat_ends_at': config.get('repeat_ends_at', ''),
-                                'tags': config.get('tags', [])
+                                'display_name': safe_get_config(config, 'name', resource_name),
+                                'starts_at': safe_get_config(config, 'starts_at', ''),
+                                'ends_at': safe_get_config(config, 'ends_at', ''),
+                                'repeat_unit': safe_get_config(config, 'repeat_unit', ''),
+                                'repeat_ends_at': safe_get_config(config, 'repeat_ends_at', ''),
+                                'tags': safe_get_config(config, 'tags', [])
                             }
                             resources['maintenance_windows'].append(mw_info)
                             
                         elif resource_type == "checkly_trigger":
                             trigger_info = {
                                 'name': resource_name,
-                                'tags': config.get('tags', [])
+                                'tags': safe_get_config(config, 'tags', [])
                             }
                             resources['triggers'].append(trigger_info)
                             
                         elif resource_type == "checkly_snippet":
                             snippet_info = {
                                 'name': resource_name,
-                                'script': config.get('script', '')
+                                'script': safe_get_config(config, 'script', '')
                             }
                             resources['snippets'].append(snippet_info)
 
@@ -180,7 +210,10 @@ def create_detailed_checkly_diagram(resources, output_path):
             
             for check in resources['checks']:
                 request = check.get('request', {})
-                if 'url' in request:
+                if isinstance(request, list) and request:
+                    request = request[0]
+                
+                if isinstance(request, dict) and 'url' in request:
                     url = request['url']
                     if 'danube' in url.lower():
                         unique_targets.add("Danube Webshop")
@@ -188,6 +221,11 @@ def create_detailed_checkly_diagram(resources, output_path):
                         unique_targets.add("API Service")
                     else:
                         unique_targets.add("Web Service")
+                        
+                # Also check script content for URLs
+                script = check.get('script', '')
+                if script and 'danube' in script.lower():
+                    unique_targets.add("Danube Webshop")
             
             if not unique_targets:
                 unique_targets.add("Target Services")
@@ -202,9 +240,14 @@ def create_detailed_checkly_diagram(resources, output_path):
             
             # Collect all unique locations
             for check in resources['checks']:
-                all_locations.update(check.get('locations', []))
+                locations = check.get('locations', [])
+                if isinstance(locations, list):
+                    all_locations.update(locations)
+                    
             for group in resources['check_groups']:
-                all_locations.update(group.get('locations', []))
+                locations = group.get('locations', [])
+                if isinstance(locations, list):
+                    all_locations.update(locations)
             
             # Default locations if none specified
             if not all_locations:
@@ -400,7 +443,15 @@ def main():
     
     print(f"   🚨 Alert Channels: {len(resources['alert_channels'])}")
     for channel in resources['alert_channels']:
-        print(f"      🚨 {channel['name']} ({channel['type']})")
+        details = channel.get('details', {})
+        detail_str = ""
+        if channel['type'] == 'pagerduty' and 'account' in details:
+            detail_str = f" - {details['account']}"
+        elif channel['type'] == 'slack' and 'channel' in details:
+            detail_str = f" - {details['channel']}"
+        elif channel['type'] == 'email' and 'address' in details:
+            detail_str = f" - {details['address']}"
+        print(f"      🚨 {channel['name']} ({channel['type']}{detail_str})")
     
     print(f"   📊 Dashboards: {len(resources['dashboards'])}")
     for dashboard in resources['dashboards']:
@@ -432,9 +483,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-""" incomplete [debug in progress]
-Installing collected packages: lark, python-hcl2
-Successfully installed lark-1.2.2 python-hcl2-7.2.1
+"""
 ⬇️ Downloading Terraform file from: https://raw.githubusercontent.com/checkly/terraform-sample-advanced/master/main.tf
 ✅ main.tf saved to: /sample_data/out/checkly_diagram/main.tf
 
@@ -449,11 +498,46 @@ Successfully installed lark-1.2.2 python-hcl2-7.2.1
    Found: checkly_check.add-to-wishlist
    Found: checkly_check_group.orders-api
    Found: checkly_alert_channel.pagerduty_ac
-❌ Error parsing Terraform file: 'list' object has no attribute 'get'
-❌ Failed to parse resources
-Traceback (most recent call last):
-  File "/tmp/ipython-input-16-1698360909.py", line 109, in parse_checkly_resources
-    channel_info['account'] = config.get('pagerduty', {}).get('account', '')
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'list' object has no attribute 'get'
+   Found: checkly_alert_channel.slack_ac
+   Found: checkly_check_group.test_group1
+   Found: checkly_check.browser-check
+   Found: checkly_maintenance_windows.maintenance-1
+   Found: checkly_dashboard.dashboard-main
+
+📊 Detailed Resource Summary:
+   📋 Checks: 7
+      ✅ GET users (API, 1s)
+      ✅ POST user (API, 1s)
+      ✅ create order (API, 1s)
+      ✅ update order (API, 1s)
+      ✅ cancel order (API, 1s)
+      ✅ add to wishlist (API, 1s)
+      ✅ ${each.key} (BROWSER, 60s)
+   📁 Check Groups: 3
+      📁 Users API (2 locations)
+      📁 Orders API (2 locations)
+      📁 Critical User Flows (1 locations)
+   🚨 Alert Channels: 2
+      🚨 pagerduty_ac (pagerduty - checkly)
+      🚨 slack_ac (slack - #checkly-notifications)
+   📊 Dashboards: 1
+      📊 dashboard-main (status.${var.checkly_dashboard_url}.com)
+   🔧 Maintenance Windows: 0
+   ⚡ Triggers: 0
+   📝 Snippets: 0
+
+🎨 Creating detailed architecture diagram...
+✅ Architecture diagram saved to: /sample_data/out/checkly_diagram/checkly_architecture.png
+
+📁 Output files:
+   - Terraform file: /sample_data/out/checkly_diagram/main.tf
+   - Architecture diagram: /sample_data/out/checkly_diagram/checkly_architecture.png
+
+🎯 Diagram includes:
+   - Monitoring locations and target services
+   - Check groups and individual checks with details
+   - Alert channels by type
+   - Public dashboards with configuration
+   - Maintenance windows and triggers
+   - Logical connections showing monitoring flow
 """
